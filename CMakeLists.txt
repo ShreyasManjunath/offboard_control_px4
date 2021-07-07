@@ -123,8 +123,12 @@ include_directories(
 )
 
 add_executable(waypoint_control src/WaypointControl.cpp)
+add_executable(uav_arming src/UAVArming.cpp)
 
 target_link_libraries(waypoint_control
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(uav_arming
   ${catkin_LIBRARIES}
 )
 
