@@ -2,6 +2,7 @@
 
 WaypointControl::WaypointControl(ros::NodeHandle& n):nh(nh),init_local_pose_check(true),waypoint_count(0)
 {
+    ROS_INFO("waypoint_control_node Started..");
     state_sub = nh.subscribe<mavros_msgs::State>("mavros/state", 10, &WaypointControl::stateCallback, this);
     local_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("mavros/local_position/pose", 10, &WaypointControl::currentPosecallback, this);
     init_local_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("mavros/local_position/pose", 10, &WaypointControl::initPoseCallback, this);
@@ -95,6 +96,8 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "waypoint_control_node");
     ros::NodeHandle nh;
+    ROS_INFO("waypoint_control_node Initialized..");
+    ros::Duration(11).sleep();
     WaypointControl wpc(nh);
 
     ros::spin();
