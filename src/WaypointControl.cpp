@@ -1,16 +1,20 @@
 #include "offboard_control_px4/WaypointControl.h"
 
-WaypointControl::WaypointControl(ros::NodeHandle& n):nh(nh),init_local_pose_check(true),waypoint_count(0)
+WaypointControl::WaypointControl(ros::NodeHandle& n):nh(nh),init_local_pose_check(true),waypoint_count(0), obtained_waypoints(false)
 {
     ROS_INFO("waypoint_control_node Started..");
     state_sub = nh.subscribe<mavros_msgs::State>("mavros/state", 10, &WaypointControl::stateCallback, this);
     local_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("mavros/local_position/pose", 10, &WaypointControl::currentPosecallback, this);
     init_local_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("mavros/local_position/pose", 10, &WaypointControl::initPoseCallback, this);
     local_pos_pub = nh.advertise<geometry_msgs::PoseStamped>("mavros/setpoint_position/local", 10);
+    computed_trajectory_posearray_sub = nh.subscribe("/computed_trajectory_posearray", 1, &WaypointControl::subscribeToWaypointsFromSIP, this);
 
     ros::Rate rate(20.0);
     
-    getWaypoint();
+    if(obtained_waypoints){
+        
+        //getWaypoint();
+    }
 		
 
 }
@@ -24,19 +28,6 @@ void WaypointControl::currentPosecallback(const geometry_msgs::PoseStamped::Cons
 }
 
 void WaypointControl::initPoseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg) {
-    if (init_local_pose_check) {
-        for(int i = 0; i < num_waypoint; i++){
-            geometry_msgs::PoseStamped temp_target_pose;
-
-            temp_target_pose.pose.position.x = msg->pose.position.x + x_pos[i];
-            temp_target_pose.pose.position.y = msg->pose.position.y + y_pos[i];
-            temp_target_pose.pose.position.z = msg->pose.position.z + z_pos[i];
-
-            waypoint_pose.push_back(temp_target_pose);
-        }
-
-        init_local_pose_check = false;
-    }
 
     publishWaypoint();
 
@@ -71,15 +62,31 @@ void WaypointControl::getWaypoint() {
     if (z_pos.size() != num_waypoint) {
         ROS_WARN("Wrong z_pos values.");
     }
+    obtained_waypoints = true;
+}
+
+void WaypointControl::subscribeToWaypointsFromSIP(const geometry_msgs::PoseArrayConstPtr& posearray){
+    if(obtained_waypoints){
+        geometry_msgs::PoseArray tempPoseArray = *posearray;
+        num_waypoint = tempPoseArray.poses.size();
+        for(geometry_msgs::Pose& pose : tempPoseArray.poses){
+            geometry_msgs::PoseStamped tempPose;
+            tempPose.pose = pose;
+            computed_trajectory_posearray.push_back(tempPose);
+        }
+        init_local_pose_check = false;
+        obtained_waypoints = true;
+    }
+    
 }
 
 void WaypointControl::publishWaypoint() {
     if (!init_local_pose_check) {
-        local_pos_pub.publish(waypoint_pose[waypoint_count]);
+        local_pos_pub.publish(computed_trajectory_posearray[waypoint_count]);
         
-        if (abs(current_pose.pose.position.x - waypoint_pose[waypoint_count].pose.position.x) < 0.5 && 
-            abs(current_pose.pose.position.y - waypoint_pose[waypoint_count].pose.position.y) < 0.5 &&
-            abs(current_pose.pose.position.z - waypoint_pose[waypoint_count].pose.position.z) < 0.5) {
+        if (abs(current_pose.pose.position.x - computed_trajectory_posearray[waypoint_count].pose.position.x) < 0.5 && 
+            abs(current_pose.pose.position.y - computed_trajectory_posearray[waypoint_count].pose.position.y) < 0.5 &&
+            abs(current_pose.pose.position.z - computed_trajectory_posearray[waypoint_count].pose.position.z) < 0.5) {
 
             waypoint_count += 1;
 
