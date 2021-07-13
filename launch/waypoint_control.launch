@@ -1,8 +1,10 @@
 <?xml version="1.0"?>
 
 <launch>
+  <arg name="test_mode" default="false"/>
+
   <node type="uav_arming" pkg="offboard_control_px4" name="uav_arming_node" output="screen"/>
   <node type="waypoint_control" pkg="offboard_control_px4" name="waypoint_control_node" output="screen">
-	<rosparam file="$(find offboard_control_px4)/yaml/waypoints.yaml" command="load" />
+      <rosparam file="$(find offboard_control_px4)/yaml/waypoints.yaml" command="load" if="$(arg test_mode)" />
   </node>
 </launch>
