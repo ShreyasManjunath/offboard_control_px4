@@ -3,6 +3,7 @@
 WaypointControl::WaypointControl(ros::NodeHandle& n):nh(nh),init_local_pose_check(true),waypoint_count(0), obtained_waypoints(false)
 {
     ROS_INFO("waypoint_control_node Started..");
+    flight_complete = false;
     state_sub = nh.subscribe<mavros_msgs::State>("mavros/state", 10, &WaypointControl::stateCallback, this);
     local_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("mavros/local_position/pose", 10, &WaypointControl::currentPosecallback, this);
     init_local_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("mavros/local_position/pose", 10, &WaypointControl::initPoseCallback, this);
@@ -33,6 +34,8 @@ void WaypointControl::initPoseCallback(const geometry_msgs::PoseStamped::ConstPt
 
     ros::Rate rate(20.0);
     rate.sleep();
+    if(flight_complete)
+        ros::shutdown();
 }
 
 void WaypointControl::getWaypoint() {
@@ -66,16 +69,19 @@ void WaypointControl::getWaypoint() {
 }
 
 void WaypointControl::subscribeToWaypointsFromSIP(const geometry_msgs::PoseArrayConstPtr& posearray){
-    if(obtained_waypoints){
+    if(!obtained_waypoints){
         geometry_msgs::PoseArray tempPoseArray = *posearray;
         num_waypoint = tempPoseArray.poses.size();
+        ROS_INFO("No of Waypoints: [%i]", num_waypoint);
         for(geometry_msgs::Pose& pose : tempPoseArray.poses){
             geometry_msgs::PoseStamped tempPose;
             tempPose.pose = pose;
             computed_trajectory_posearray.push_back(tempPose);
         }
+        ROS_INFO("Waypoints recvd.");
         init_local_pose_check = false;
         obtained_waypoints = true;
+        start_time = ros::WallTime::now();
     }
     
 }
@@ -84,14 +90,19 @@ void WaypointControl::publishWaypoint() {
     if (!init_local_pose_check) {
         local_pos_pub.publish(computed_trajectory_posearray[waypoint_count]);
         
-        if (abs(current_pose.pose.position.x - computed_trajectory_posearray[waypoint_count].pose.position.x) < 0.5 && 
-            abs(current_pose.pose.position.y - computed_trajectory_posearray[waypoint_count].pose.position.y) < 0.5 &&
-            abs(current_pose.pose.position.z - computed_trajectory_posearray[waypoint_count].pose.position.z) < 0.5) {
+        if (abs(current_pose.pose.position.x - computed_trajectory_posearray[waypoint_count].pose.position.x) < 0.2 && 
+            abs(current_pose.pose.position.y - computed_trajectory_posearray[waypoint_count].pose.position.y) < 0.2 &&
+            abs(current_pose.pose.position.z - computed_trajectory_posearray[waypoint_count].pose.position.z) < 0.2) {
 
             waypoint_count += 1;
-
+            ROS_INFO("Next Waypoint ID: [%i]", waypoint_count);
             if (waypoint_count >= num_waypoint) {
                 waypoint_count--;
+                flight_complete = true;
+                end_time = ros::WallTime::now();
+                //duration_of_flight = (end_time - start_time).toNSec() * 1e-6;
+                //ROS_INFO("Duration of Flight: %d seconds.", duration_of_flight);
+                return;
             }
 
         }

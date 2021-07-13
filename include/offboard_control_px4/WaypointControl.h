@@ -28,13 +28,17 @@ private:
 	bool init_local_pose_check;
 	int waypoint_count;
 	bool obtained_waypoints;
-
+	bool flight_complete;
 	
 	int num_waypoint;
 	std::vector<double> x_pos;
 	std::vector<double> y_pos;
 	std::vector<double> z_pos;
 	std::vector<geometry_msgs::PoseStamped> computed_trajectory_posearray;
+
+	ros::WallTime start_time;
+	ros::WallTime end_time;
+	double duration_of_flight;
 
 public:
 	WaypointControl(ros::NodeHandle& n);
