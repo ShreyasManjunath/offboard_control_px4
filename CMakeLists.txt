@@ -114,22 +114,29 @@ catkin_package(
 ###########
 ## Build ##
 ###########
+find_package(Eigen3 3.1.0 REQUIRED)
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  ${EIGEN3_INCLUDE_DIR}
 )
 
 add_executable(waypoint_control src/WaypointControl.cpp)
 add_executable(uav_arming src/UAVArming.cpp)
+add_executable(waypoint_mission_node src/mission_mode_node.cpp)
 
 target_link_libraries(waypoint_control
   ${catkin_LIBRARIES}
 )
 target_link_libraries(uav_arming
   ${catkin_LIBRARIES}
+)
+target_link_libraries(waypoint_mission_node
+  ${catkin_LIBRARIES}
+  ${EIGEN3_INCLUDE_DIR}
 )
 
 

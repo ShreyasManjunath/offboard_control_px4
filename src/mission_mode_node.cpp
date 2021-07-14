@@ -105,7 +105,7 @@ void convertPoseArrayToWPformat(mavros_msgs::WaypointPush& wp_push_srv){
         double x,y,z;
         double roll,pitch,yaw;
         double lat, lon, alt;
-        alt = pose.position.z
+        alt = pose.position.z;
         Eigen::Quaterniond q(pose.orientation.w, pose.orientation.x, pose.orientation.y, pose.orientation.z);
         Eigen::Matrix3d rx = q.toRotationMatrix();
         Eigen::Vector3d euler = rx.eulerAngles(2,1,0);
