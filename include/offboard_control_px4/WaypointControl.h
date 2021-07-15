@@ -4,6 +4,7 @@
 #include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <mavros_msgs/CommandBool.h>
+#include <mavros_msgs/CommandTOL.h>
 #include <mavros_msgs/SetMode.h>
 #include <mavros_msgs/State.h>
 #include <vector>
@@ -21,6 +22,7 @@ private:
 	ros::ServiceClient arming_client;
 	ros::ServiceClient set_mode_client;
 	ros::Subscriber computed_trajectory_posearray_sub;
+	ros::ServiceClient landing_client;
 
 	mavros_msgs::State current_state;
 	geometry_msgs::PoseStamped current_pose;
@@ -48,6 +50,8 @@ public:
 	void currentPosecallback(const geometry_msgs::PoseStamped::ConstPtr& msg);
 	void initPoseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg);
 	void subscribeToWaypointsFromSIP(const geometry_msgs::PoseArrayConstPtr& posearray);
+	bool landVehicle();
+	bool disarmVehicle();
 	
 };
 

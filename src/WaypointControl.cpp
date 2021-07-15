@@ -9,10 +9,10 @@ WaypointControl::WaypointControl(ros::NodeHandle& n):nh(nh),init_local_pose_chec
     init_local_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("mavros/local_position/pose", 10, &WaypointControl::initPoseCallback, this);
     local_pos_pub = nh.advertise<geometry_msgs::PoseStamped>("mavros/setpoint_position/local", 10);
     computed_trajectory_posearray_sub = nh.subscribe("/computed_trajectory_posearray", 1, &WaypointControl::subscribeToWaypointsFromSIP, this);
-
-    ros::Rate rate(20.0);
+    arming_client = nh.serviceClient<mavros_msgs::CommandBool> ("mavros/cmd/arming");
+    landing_client = nh.serviceClient<mavros_msgs::CommandTOL> ("mavros/cmd/land");
     
-    if(obtained_waypoints){
+    if(!obtained_waypoints){
         
         //getWaypoint();
     }
@@ -30,12 +30,24 @@ void WaypointControl::currentPosecallback(const geometry_msgs::PoseStamped::Cons
 
 void WaypointControl::initPoseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg) {
 
-    publishWaypoint();
+    if(!flight_complete)
+        publishWaypoint();
 
     ros::Rate rate(20.0);
     rate.sleep();
-    if(flight_complete)
-        ros::shutdown();
+    if(flight_complete){
+        bool flag = false;
+        flag = landVehicle();
+        if(flag){
+            if(disarmVehicle())
+                ROS_INFO("Mission complete.");
+            
+            ros::shutdown();
+        }
+            
+        
+    }
+        
 }
 
 void WaypointControl::getWaypoint() {
@@ -107,6 +119,35 @@ void WaypointControl::publishWaypoint() {
 
         }
     }
+}
+
+bool WaypointControl::landVehicle(){
+
+    mavros_msgs::CommandTOL land_cmd;
+    ros::Rate rate(20.0);
+    land_cmd.request.yaw = 0;
+    land_cmd.request.latitude = 0;
+    land_cmd.request.longitude = 0;
+    land_cmd.request.altitude = 0;   
+    while (!(landing_client.call(land_cmd) &&
+            land_cmd.response.success)){
+      ROS_INFO("tring to land");
+      ros::spinOnce();
+      rate.sleep();
+    }
+    ROS_INFO("Vehicle Landed.");
+    return land_cmd.response.success;
+}
+
+bool WaypointControl::disarmVehicle(){
+    mavros_msgs::CommandBool arm_cmd;
+    arm_cmd.request.value = false;
+    while(current_state.armed){
+        if( arming_client.call(arm_cmd) && arm_cmd.response.success){
+            ROS_INFO("Vehicle disarmed.");
+        }
+    }
+    return arm_cmd.response.success;
 }
 
 
