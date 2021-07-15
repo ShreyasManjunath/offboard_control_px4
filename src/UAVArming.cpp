@@ -11,6 +11,8 @@
 #include <mavros_msgs/State.h>
 #include <fstream>
 #include <vector>
+#include <mavros_msgs/ParamSet.h>
+#include <mavros_msgs/ParamValue.h>
 
 mavros_msgs::State current_state;
 
@@ -24,6 +26,22 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "uav_arming_node");
     ros::NodeHandle nh;
 
+    // default values for linear speed and angular yaw rate(angular speed).
+    float g_speed;
+    float g_maxAngularSpeed;
+
+    if(!ros::param::get("/Inspection_Planner/rotorcraft/maxSpeed", g_speed)){
+        ROS_ERROR("MISSING PARAMETER: Max Linear Speed - MPC_XY_VEL_MAX");
+        g_speed = 0.25;
+        ROS_INFO("Setting Default values : MPC_XY_VEL_MAX: %d", g_speed);
+    }
+        
+    if(!ros::param::get("/Inspection_Planner/rotorcraft/maxAngularSpeed", g_maxAngularSpeed)){
+        ROS_ERROR("MISSING PARAMETER: Max Angular Speed - MC_YAWRATE_MAX");
+        g_maxAngularSpeed = 0.25;
+        ROS_INFO("Setting Default values : MC_YAWRATE_MAX: %d", g_maxAngularSpeed);
+    }
+        
     ros::Subscriber state_sub = nh.subscribe<mavros_msgs::State>
             ("mavros/state", 10, state_cb);
     ros::Publisher local_pos_pub = nh.advertise<geometry_msgs::PoseStamped>
@@ -42,6 +60,20 @@ int main(int argc, char **argv)
         ros::spinOnce();
         rate.sleep();
     }
+
+    auto set_param = [](std::string name, auto value) {
+        mavros_msgs::ParamSet p;
+        mavros_msgs::ParamValue v;
+        p.request.param_id = name;
+        v.real             = value;
+        p.request.value    = v;
+        if (ros::service::call("mavros/param/set", p)) {
+            ROS_INFO_STREAM("Set Parameter " << name << " to " << value);
+        }
+    };
+    set_param("MPC_XY_VEL_MAX", g_speed);
+    set_param("MC_YAWRATE_MAX", g_maxAngularSpeed);
+
 
     geometry_msgs::PoseStamped p1;
     p1.pose.position.x = 0;
