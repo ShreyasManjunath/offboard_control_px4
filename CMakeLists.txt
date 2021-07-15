@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   mavros_msgs
   geometry_msgs
+  mavlink
 )
 
 ## System dependencies are found with CMake's conventions
@@ -138,5 +139,6 @@ target_link_libraries(waypoint_mission_node
   ${catkin_LIBRARIES}
   ${EIGEN3_INCLUDE_DIR}
 )
+
 
 
