@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+
+<launch>
+
+  <node type="heart_beat_node.py" pkg="offboard_control_px4" name="heart_beat_node" output="screen"/>
+  <node type="waypoint_mission_node" pkg="offboard_control_px4" name="waypoint_mission_node" output="screen">
+  </node>
+</launch>
