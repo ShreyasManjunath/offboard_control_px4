@@ -107,6 +107,8 @@ void WaypointControl::publishWaypoint() {
             abs(current_pose.pose.position.z - computed_trajectory_posearray[waypoint_count].pose.position.z) < 0.2) {
 
             waypoint_count += 1;
+            // Waits at the waypoint for specified time.
+            waitAtWaypoint(0.5);
             ROS_INFO("Next Waypoint ID: [%i]", waypoint_count);
             if (waypoint_count >= num_waypoint) {
                 waypoint_count--;
@@ -148,6 +150,15 @@ bool WaypointControl::disarmVehicle(){
         }
     }
     return arm_cmd.response.success;
+}
+
+void WaypointControl::waitAtWaypoint(double waitTime){
+    ros::Rate rate(10.0); // 10 hz or 0.1 sec
+    int iter = waitTime/0.1; // Number of iterations fulfilling the waitTime.
+    for(int i = 0; i < iter && ros::ok(); i++){
+        local_pos_pub.publish(computed_trajectory_posearray[waypoint_count]);
+        rate.sleep();
+    }
 }
 
 

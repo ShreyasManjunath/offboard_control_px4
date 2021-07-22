@@ -52,6 +52,7 @@ public:
 	void subscribeToWaypointsFromSIP(const geometry_msgs::PoseArrayConstPtr& posearray);
 	bool landVehicle();
 	bool disarmVehicle();
+	void waitAtWaypoint(double waitTime);
 	
 };
 
