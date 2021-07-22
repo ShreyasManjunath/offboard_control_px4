@@ -13,6 +13,9 @@
 #include <vector>
 #include <mavros_msgs/ParamSet.h>
 #include <mavros_msgs/ParamValue.h>
+#include <cmath>
+
+#define _USE_MATH_DEFINES
 
 mavros_msgs::State current_state;
 
@@ -32,15 +35,17 @@ int main(int argc, char **argv)
 
     if(!ros::param::get("/Inspection_Planner/rotorcraft/maxSpeed", g_speed)){
         ROS_ERROR("MISSING PARAMETER: Max Linear Speed - MPC_XY_VEL_MAX");
-        g_speed = 0.25;
+        g_speed = 12.0;
         ROS_INFO("Setting Default values : MPC_XY_VEL_MAX: %d", g_speed);
     }
         
     if(!ros::param::get("/Inspection_Planner/rotorcraft/maxAngularSpeed", g_maxAngularSpeed)){
         ROS_ERROR("MISSING PARAMETER: Max Angular Speed - MC_YAWRATE_MAX");
-        g_maxAngularSpeed = 0.25;
+        g_maxAngularSpeed = 3.490; // In rad
         ROS_INFO("Setting Default values : MC_YAWRATE_MAX: %d", g_maxAngularSpeed);
     }
+
+    g_maxAngularSpeed = g_maxAngularSpeed * (180.0/M_PI);
         
     ros::Subscriber state_sub = nh.subscribe<mavros_msgs::State>
             ("mavros/state", 10, state_cb);

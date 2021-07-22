@@ -108,7 +108,7 @@ void WaypointControl::publishWaypoint() {
 
             waypoint_count += 1;
             // Waits at the waypoint for specified time.
-            waitAtWaypoint(0.5);
+            //waitAtWaypoint(0.5);
             ROS_INFO("Next Waypoint ID: [%i]", waypoint_count);
             if (waypoint_count >= num_waypoint) {
                 waypoint_count--;
