@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+
+<launch>
+	<include file="$(find koptplanner)/launch/robodekon.launch"/>
+	<include file="$(find offboard_control_px4)/launch/waypoint_offboard_control.launch"/>
+</launch>
