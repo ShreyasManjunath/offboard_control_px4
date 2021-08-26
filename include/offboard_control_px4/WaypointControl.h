@@ -9,6 +9,7 @@
 #include <mavros_msgs/State.h>
 #include <vector>
 #include <geometry_msgs/PoseArray.h>
+#include <koptplanner/VPTrianglePairList.h>
 
 
 class WaypointControl {  
@@ -22,6 +23,7 @@ private:
 	ros::ServiceClient arming_client;
 	ros::ServiceClient set_mode_client;
 	ros::Subscriber computed_trajectory_posearray_sub;
+	ros::Subscriber vp_tri_pair_list_sub;
 	ros::ServiceClient landing_client;
 
 	mavros_msgs::State current_state;
@@ -42,6 +44,8 @@ private:
 	ros::WallTime end_time;
 	double duration_of_flight;
 
+	koptplanner::VPTrianglePairList pairListMsg;
+
 public:
 	WaypointControl(ros::NodeHandle& n);
 	void publishWaypoint();
@@ -53,6 +57,7 @@ public:
 	bool landVehicle();
 	bool disarmVehicle();
 	void waitAtWaypoint(double waitTime);
+	void subscribeToVPTrianglePairList(const koptplanner::VPTrianglePairListConstPtr& list);
 	
 };
 

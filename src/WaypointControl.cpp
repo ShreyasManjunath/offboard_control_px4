@@ -8,6 +8,7 @@ WaypointControl::WaypointControl(ros::NodeHandle& n):nh(nh),init_local_pose_chec
     local_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("mavros/local_position/pose", 10, &WaypointControl::currentPosecallback, this);
     init_local_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>("mavros/local_position/pose", 10, &WaypointControl::initPoseCallback, this);
     local_pos_pub = nh.advertise<geometry_msgs::PoseStamped>("mavros/setpoint_position/local", 10);
+    vp_tri_pair_list_sub = nh.subscribe<koptplanner::VPTrianglePairList>("vp_triangle_pair_list", 1, &WaypointControl::subscribeToVPTrianglePairList, this);
     computed_trajectory_posearray_sub = nh.subscribe("/computed_trajectory_posearray", 1, &WaypointControl::subscribeToWaypointsFromSIP, this);
     arming_client = nh.serviceClient<mavros_msgs::CommandBool> ("mavros/cmd/arming");
     landing_client = nh.serviceClient<mavros_msgs::CommandTOL> ("mavros/cmd/land");
@@ -147,6 +148,9 @@ bool WaypointControl::disarmVehicle(){
     while(current_state.armed){
         if( arming_client.call(arm_cmd) && arm_cmd.response.success){
             ROS_INFO("Vehicle disarmed.");
+            ros::Rate rate(20.0);
+            rate.sleep();
+            break;
         }
     }
     return arm_cmd.response.success;
@@ -159,6 +163,11 @@ void WaypointControl::waitAtWaypoint(double waitTime){
         local_pos_pub.publish(computed_trajectory_posearray[waypoint_count]);
         rate.sleep();
     }
+}
+
+void WaypointControl::subscribeToVPTrianglePairList(const koptplanner::VPTrianglePairListConstPtr& list)
+{
+    pairListMsg = *list;
 }
 
 
