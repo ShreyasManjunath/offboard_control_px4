@@ -5,7 +5,7 @@
 	<ambient>255 255 255 255</ambient>
     </scene>
     <!-- A global light source -->
-    <light name='sun' type='directional'>
+    <!--light name='sun' type='directional'>
       <cast_shadows>1</cast_shadows>
       <pose frame=''>5 5 10 0 -0 0</pose>
       <diffuse>0.8 0.8 0.8 1</diffuse>
@@ -145,15 +145,15 @@
       <light name='user_spot_light_5'>
         <pose frame=''>-13.8469 16.8635 9.51341 0 -1.11294 0</pose>
       </light>
-    </state>
+    </state-->
    
     <!-- A ground plane -->
     <include>
       <uri>model://ground_plane</uri>
     </include>
-    <include>
+    <!--include>
       <uri>model://asphalt_plane</uri>
-    </include>
+    </include-->
     <include>
       <uri>model://robdekon_halle</uri>
     </include>

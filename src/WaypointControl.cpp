@@ -147,6 +147,7 @@ bool WaypointControl::disarmVehicle(){
     while(current_state.armed){
         if( arming_client.call(arm_cmd) && arm_cmd.response.success){
             ROS_INFO("Vehicle disarmed.");
+            break;
         }
     }
     return arm_cmd.response.success;

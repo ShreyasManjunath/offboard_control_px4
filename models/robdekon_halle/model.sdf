@@ -7,7 +7,7 @@
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://robdekon_halle/meshes/robdekon_halle_textured.dae</uri>
+            <uri>model://robdekon_halle/meshes/robdekon_withPerlin.dae</uri>
             <scale>1 1 1</scale>
           </mesh>
         </geometry>
