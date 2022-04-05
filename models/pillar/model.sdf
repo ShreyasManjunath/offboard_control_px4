@@ -1,23 +1,22 @@
 <?xml version='1.0'?>
 <sdf version="1.4">
-  <model name="robodekon">
+  <model name="pillar">
     <pose>0 0 0 0 0 0</pose>
     <static>true</static>
     <link name="link_plant">
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://robdekon_halle/meshes/robdekon_withPerlin.dae</uri>
-	    <!--uri>model://robdekon_halle/meshes/test.dae</uri-->
+	    <uri>model://pillar/meshes/pillar.dae</uri>
             <scale>1 1 1</scale>
           </mesh>
         </geometry>
         <material>
-	  <shader type='pixel'/>
-          <!--script>
+	  <!--shader type='pixel'/-->
+          <script>
             <uri>file://media/materials/scripts/gazebo.material</uri>
-            <name>Gazebo/DarkYellow</name>
-          </script-->
+            <name>Gazebo/Bricks</name>
+          </script>
         </material>
       </visual>
     </link>

@@ -36,6 +36,7 @@ void WaypointControl::initPoseCallback(const geometry_msgs::PoseStamped::ConstPt
     ros::Rate rate(20.0);
     rate.sleep();
     if(flight_complete){
+        ROS_INFO("Flight Complete.");
         bool flag = false;
         flag = landVehicle();
         if(flag){
@@ -105,11 +106,13 @@ void WaypointControl::publishWaypoint() {
         if (abs(current_pose.pose.position.x - computed_trajectory_posearray[waypoint_count].pose.position.x) < 0.2 && 
             abs(current_pose.pose.position.y - computed_trajectory_posearray[waypoint_count].pose.position.y) < 0.2 &&
             abs(current_pose.pose.position.z - computed_trajectory_posearray[waypoint_count].pose.position.z) < 0.2) {
-
+            
             waypoint_count += 1;
+            ROS_INFO("Reached Waypoint ID: [%i]", waypoint_count);
+            
             // Waits at the waypoint for specified time.
-            //waitAtWaypoint(0.5);
-            ROS_INFO("Next Waypoint ID: [%i]", waypoint_count);
+            waitAtWaypoint(1.0);
+
             if (waypoint_count >= num_waypoint) {
                 waypoint_count--;
                 flight_complete = true;

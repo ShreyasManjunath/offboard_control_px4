@@ -33,13 +33,15 @@ int main(int argc, char **argv)
     float g_speed;
     float g_maxAngularSpeed;
 
-    if(!ros::param::get("/Inspection_Planner/rotorcraft/maxSpeed", g_speed)){
+    std::string node = "/VID_SIP_Planner_Node";
+
+    if(!ros::param::get(node + "/rotorcraft/maxSpeed", g_speed)){
         ROS_ERROR("MISSING PARAMETER: Max Linear Speed - MPC_XY_VEL_MAX");
         g_speed = 12.0;
         ROS_INFO("Setting Default values : MPC_XY_VEL_MAX: %d", g_speed);
     }
         
-    if(!ros::param::get("/Inspection_Planner/rotorcraft/maxAngularSpeed", g_maxAngularSpeed)){
+    if(!ros::param::get(node +"/rotorcraft/maxAngularSpeed", g_maxAngularSpeed)){
         ROS_ERROR("MISSING PARAMETER: Max Angular Speed - MC_YAWRATE_MAX");
         g_maxAngularSpeed = 3.490; // In rad
         ROS_INFO("Setting Default values : MC_YAWRATE_MAX: %d", g_maxAngularSpeed);
